@@ -11,9 +11,8 @@ COPY server .
 
 # The single ampersand is intentional, we need the server running when we publish the module
 # the build takes long enough for the server to start, this may break in the future if the server takes forever to start.
-RUN spacetime start /stdb & \
-    sleep 5 && \
-    spacetime build && \
+RUN spacetime start /stdb
+RUN spacetime build && \
     spacetime publish /app/obj/Release/net8.0/wasi-wasm/wasm/for-publish/StdbModule.wasm -s local
 
 
