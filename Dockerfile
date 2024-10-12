@@ -8,6 +8,8 @@ RUN apt-get update && apt-get install -y binaryen \
     && dotnet workload install wasi-experimental
 
 COPY server .
+
+RUN sleep 10
 # The single ampersand is intentional, we need the server running when we publish the module
 # the build takes long enough for the server to start, this may break in the future if the server takes forever to start.
 RUN spacetime start /stdb \
