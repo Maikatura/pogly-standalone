@@ -15,7 +15,7 @@ import { getActiveLayout } from "../../StDB/SpacetimeDBUtils";
 import { useAuth } from "react-oidc-context";
 
 export const Login = () => {
-  const isOverlay: Boolean = window.location.href.includes("/overlay");
+  const isOverlay: Boolean = window.location.pathname.startsWith("/overlay");
   const navigate = useNavigate();
   const auth = useAuth();
 
