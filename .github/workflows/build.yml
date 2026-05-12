@@ -5,8 +5,12 @@ on:
     branches-ignore:
       - refs/tags/v*
   release:
+    # Listen on both: `created` fires when a release (incl. draft) is first
+    # saved; `published` fires when a draft transitions to public. Catching
+    # both means draft-then-publish workflows still trigger asset uploads.
     types:
       - created
+      - published
 
 jobs:
   backend:
@@ -36,10 +40,21 @@ jobs:
           # and clockworklabs/spacetime image tag in the Dockerfile.
           SPACETIME_VERSION: v1.7.0
         run: |
+          set -euo pipefail
           mkdir -p "$HOME/.local/bin"
+          TMPDIR=$(mktemp -d)
           curl -sSfL "https://github.com/clockworklabs/SpacetimeDB/releases/download/${SPACETIME_VERSION}/spacetime-x86_64-unknown-linux-gnu.tar.gz" \
-            | tar -xz -C "$HOME/.local/bin"
-          chmod +x "$HOME/.local/bin/spacetime"
+            | tar -xz -C "$TMPDIR"
+          # The tarball contains a top-level subdir; `find` makes us agnostic
+          # to whether the binary lives there or at the root.
+          BINARY=$(find "$TMPDIR" -name spacetime -type f | head -n1)
+          if [ -z "$BINARY" ]; then
+            echo "Failed to locate 'spacetime' binary in tarball:"
+            find "$TMPDIR" -type f
+            exit 1
+          fi
+          install -m 0755 "$BINARY" "$HOME/.local/bin/spacetime"
+          "$HOME/.local/bin/spacetime" --version
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Build module
