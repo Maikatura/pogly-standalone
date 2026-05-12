@@ -7,6 +7,7 @@ import { UploadBackupFromFile, UploadElementDataFromString } from "../../../Util
 import { useGetDefaultElements } from "../../../Hooks/useGetDefaultElements";
 import { QuickSwapType } from "../../../Types/General/QuickSwapType";
 import { useNavigate } from "react-router-dom";
+import { oidcEnabled } from "../../../Auth/oidc";
 
 interface IProps {
   connectionConfig: ConnectionConfigType;
@@ -406,26 +407,28 @@ export const ModuleOnboarding = ({ connectionConfig, spacetime }: IProps) => {
                 configuration from the settings.
               </p>
 
-              <div className="mt-8">
-                <p>
-                  It is <b><u>your responsibility</u></b> to keep your owner authentication token
-                  safe. Copy your backup token by clicking the button below and save it somewhere safe!
-                </p>
-                <StyledButton
-                  onClick={() => {
-                    navigator.clipboard.writeText(localStorage.getItem("stdbToken")!);
+              {!oidcEnabled && (
+                <div className="mt-8">
+                  <p>
+                    It is <b><u>your responsibility</u></b> to keep your owner authentication token
+                    safe. Copy your backup token by clicking the button below and save it somewhere safe!
+                  </p>
+                  <StyledButton
+                    onClick={() => {
+                      navigator.clipboard.writeText(localStorage.getItem("stdb-token") ?? "");
 
-                    setCopyAuthButtonText("Copied!");
+                      setCopyAuthButtonText("Copied!");
 
-                    setTimeout(() => {
-                      setCopyAuthButtonText("Copy Owner Token");
-                    }, 1000);
-                  }}
-                  className="ml-0! mt-2"
-                >
-                  {copyAuthButtonText}
-                </StyledButton>
-              </div>
+                      setTimeout(() => {
+                        setCopyAuthButtonText("Copy Owner Token");
+                      }, 1000);
+                    }}
+                    className="ml-0! mt-2"
+                  >
+                    {copyAuthButtonText}
+                  </StyledButton>
+                </div>
+              )}
 
               <div className="mt-8">
                 <p>

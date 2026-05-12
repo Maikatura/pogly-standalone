@@ -57,7 +57,7 @@ export const Overlay = () => {
   useEffect(() => {
     if (userDisconnected || spacetimeDB.Disconnected) {
       DebugLogger("Overlay is disconnected");
-      localStorage.removeItem("stdbToken");
+      localStorage.removeItem("stdb-token");
       window.location.reload();
     }
   }, [userDisconnected, spacetimeDB.Disconnected]);

@@ -14,7 +14,7 @@ export const AuthTokenModal = () => {
 
   const handleSetToken = () => {
     DebugLogger("Setting auth token");
-    localStorage.setItem("stdbToken", token);
+    localStorage.setItem("stdb-token", token);
     closeModal("authToken_modal", modals, setModals);
   };
 
