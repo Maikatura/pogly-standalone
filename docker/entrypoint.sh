@@ -50,14 +50,36 @@ deploy() {
     echo "Waiting for server to start..."
     sleep 1
   done
-  echo "Server is up; publishing modules."
+  echo "Server is up."
 
+  # We publish each module at most once per persistent /stdb volume. The wasm
+  # itself only changes when the image is rebuilt; re-publishing on every
+  # restart would either churn unnecessarily (anonymous identity changes) or
+  # fail (the new anonymous identity isn't the wasm owner anymore). A sentinel
+  # file inside /stdb tracks the "already published" state and survives
+  # restarts because /stdb is a docker volume.
+  #
+  # To force a republish (e.g. after updating to a new image with a new wasm),
+  # either delete the sentinel before restarting:
+  #     docker exec <container> rm /stdb/.pogly-published-<module>
+  # or set POGLY_FORCE_REPUBLISH=1 in the environment.
   read -ra module_names <<<"$MODULES"
-  echo "Publishing ${#module_names[@]} modules"
   for module in "${module_names[@]}"
   do
-    echo "$module"
-    spacetime publish --bin-path /app/pogly.wasm --server http://localhost:3000 --anonymous --yes "$module"
+    sentinel="/stdb/.pogly-published-$module"
+    if [ -f "$sentinel" ] && [ "${POGLY_FORCE_REPUBLISH:-}" != "1" ]; then
+      echo "Module '$module' already published (sentinel $sentinel present) - skipping."
+      continue
+    fi
+
+    echo "Publishing module '$module'..."
+    if spacetime publish --bin-path /app/pogly.wasm --server http://localhost:3000 --anonymous --yes "$module"; then
+      touch "$sentinel"
+      echo "Module '$module' published successfully."
+    else
+      echo "Failed to publish '$module' - sentinel not written, will retry on next start."
+      exit 1
+    fi
   done
 }
 

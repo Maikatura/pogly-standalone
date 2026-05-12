@@ -32,7 +32,12 @@ const useStDB = (
 
     let stdbDomain = connectionConfig?.domain || "";
     if (isOverlay && stdbDomain === "") {
-      stdbDomain = "wss://maincloud.spacetimedb.com";
+      // When an overlay URL has no ?domain= param, default to the same origin
+      // the page was served from. Pogly Standalone is self-host only — the
+      // bundled caddy reverse-proxies /v1/* to the embedded SpacetimeDB on the
+      // same port — so same-origin is always the right answer.
+      const proto = window.location.protocol === "https:" ? "wss:" : "ws:";
+      stdbDomain = `${proto}//${window.location.host}`;
     }
 
     const normalizedOidcToken = typeof oidcIdToken === "string" ? oidcIdToken.trim() : "";
@@ -43,10 +48,7 @@ const useStDB = (
       stdbToken = localStorage.getItem("stdb-token") || "";
     }
 
-    let modulename = connectionConfig?.module.replace("_", "-").toLocaleLowerCase() || "";
-    if (window.location.origin === "https://cloud.pogly.gg") {
-      modulename = "pogly-" + modulename;
-    }
+    const modulename = connectionConfig?.module.replace("_", "-").toLocaleLowerCase() || "";
 
     const tokenToUse = isOverlay ? "" : usingOidc ? normalizedOidcToken : stdbToken;
 

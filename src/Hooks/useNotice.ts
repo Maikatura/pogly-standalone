@@ -2,13 +2,16 @@ import { useEffect } from "react";
 import { DebugLogger } from "../Utility/DebugLogger";
 
 export const useNotice = (setNoticeMessage: Function) => {
-  const isPoglyOrDevInstance: Boolean =
-    window.location.href.includes("localhost") || window.location.href.includes("standalone.pogly.gg");
+  // Pogly Standalone is self-host only; the upstream notice feed at
+  // PoglyApp/.github/beacons/notice is for the Pogly team's own deployments.
+  // We still fetch it for `localhost` so developers working on this codebase
+  // can test the banner end-to-end, but skip it everywhere else.
+  const isDevInstance: Boolean = window.location.href.includes("localhost");
 
   // TODO: Support for multiple notices at the same time
 
   useEffect(() => {
-    if (!isPoglyOrDevInstance) return;
+    if (!isDevInstance) return;
 
     DebugLogger("Fetching notice");
 
@@ -23,5 +26,5 @@ export const useNotice = (setNoticeMessage: Function) => {
 
       setNoticeMessage({ noticeId: responseJson.id, notice: responseJson.notice });
     })();
-  }, [isPoglyOrDevInstance, setNoticeMessage]);
+  }, [isDevInstance, setNoticeMessage]);
 };

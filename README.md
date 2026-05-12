@@ -52,12 +52,21 @@ Editors can add, edit, and delete overlay elements, with the changes being displ
 
 ## Looking to use Pogly in your stream?
 
-We offer both self-hosted option and **free** provided hosting (No installation required).
-If you're not tech-savvy and don't deliberately want to self-host Pogly, check out the [beginner's guide](https://github.com/PoglyApp/pogly-documentation/blob/main/use/beginnerGuide.md). It contains everything you need to know about how to setup Pogly.
+If you don't want to self-host, sign up for **free** at [pogly.gg](https://pogly.gg) — no installation required. The [beginner's guide](https://github.com/PoglyApp/pogly-documentation/blob/main/use/beginnerGuide.md) walks you through the cloud setup.
 
-For self-hosting installation and usage instructions please see the [Docs](https://github.com/PoglyApp/pogly-documentation/blob/main/index.md).
+If you'd rather run your own instance, see **[Self-hosting Pogly Standalone](./docs/SELF_HOSTING.md)** for the Docker-based guide. It covers Mode 1 (anonymous tokens, no external accounts) and Mode 2 (third-party OIDC, recoverable identities).
 
-For assistance with setting up Pogly, we are available in our [Discord](https://discord.gg/pogly).
+A one-liner to try it locally:
+
+```bash
+docker volume create pogly-stdb
+docker run -d --name pogly -p 8080:80 -v pogly-stdb:/stdb \
+  ghcr.io/poglyapp/pogly:latest
+```
+
+Then open <http://localhost:8080>, pick the **docker** preset, and use `pogly` as the module name.
+
+Need help? Join our [Discord](https://discord.gg/pogly).
 
 ## Used by
 
