@@ -26,6 +26,10 @@ COPY --from=module /app/pogly.wasm /app/pogly.wasm
 COPY docker/Caddyfile /etc/caddy/
 COPY docker/entrypoint.sh /app/entrypoint.sh
 
+# Strip any CRLF line endings introduced by Windows checkouts so bash can
+# parse the script. Belt-and-braces alongside the eol=lf rule in .gitattributes.
+RUN sed -i 's/\r$//' /app/entrypoint.sh
+
 ENTRYPOINT ["/bin/bash", "/app/entrypoint.sh"]
 EXPOSE 80/tcp
 VOLUME /stdb

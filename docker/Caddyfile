@@ -1,9 +1,8 @@
 :80 {
-    @spacetime {
-        path /identity/*
-        path /database/*
-        path /energy/*
-    }
+    # SpacetimeDB v1.x moved its HTTP / WebSocket surface under /v1/*. Caddy's
+    # reverse_proxy auto-handles the WebSocket Upgrade headers, so the same
+    # rule covers both REST and ws://.../subscribe traffic.
+    @spacetime path /v1/*
 
     handle @spacetime {
         reverse_proxy localhost:3000

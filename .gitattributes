@@ -1,2 +1,9 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Force LF for files that run inside Linux containers, regardless of a
+# contributor's local core.autocrlf setting. Without this, Windows clones
+# pick up CRLF and break bash inside the docker image.
+*.sh           text eol=lf
+Dockerfile     text eol=lf
+docker/*       text eol=lf
