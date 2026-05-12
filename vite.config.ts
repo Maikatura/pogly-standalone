@@ -48,6 +48,12 @@ function setEnv(mode: string) {
 // Expose `process.env` environment variables to your client code
 // Migration guide: Follow the guide below to replace process.env with import.meta.env in your app, you may also need to rename your environment variable to a name that begins with VITE_ instead of REACT_APP_
 // https://vitejs.dev/guide/env-and-mode.html#env-variables
+//
+// OIDC vars (OIDC_ISSUER / OIDC_CLIENT_ID) get baked normally if present at
+// build time, but they can ALSO be overridden at container runtime via
+// `window.POGLY_RUNTIME_CONFIG` (populated by docker/entrypoint.sh, served at
+// /config.js). See src/Auth/oidc.ts for the lookup order. This avoids
+// editing the bundle in place, which mangled internal sentinel constants.
 function envPlugin(): Plugin {
   return {
     name: "env-plugin",

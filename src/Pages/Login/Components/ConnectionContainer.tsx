@@ -34,7 +34,7 @@ const ConnectionContainerInner = ({ setInstanceSettings, setNickname, oidc }: IP
   const [stdbToken, setStdbToken] = useState<string>(localStorage.getItem("stdb-token") || "");
   const [moduleName, setModuleName] = useState<string>("");
   const [authKey, setAuthKey] = useState<string>("");
-  const [domain, setDomain] = useState<string>("wss://maincloud.spacetimedb.com");
+  const [domain, setDomain] = useState<string>("ws://localhost:8080");
   const [customDomain, setCustomDomain] = useState<boolean>(false);
 
   const nicknameFieldRef = useRef<HTMLInputElement>(null);
@@ -112,8 +112,8 @@ const ConnectionContainerInner = ({ setInstanceSettings, setNickname, oidc }: IP
 
   const handleDomainChange = (value: any) => {
     switch (value.target.value) {
-      case "Cloud":
-        setDomain("wss://maincloud.spacetimedb.com");
+      case "Docker":
+        setDomain("ws://localhost:8080");
         setCustomDomain(false);
         break;
       case "Local":
@@ -145,8 +145,8 @@ const ConnectionContainerInner = ({ setInstanceSettings, setNickname, oidc }: IP
     if (!domainRef.current) return;
 
     switch (module.domain) {
-      case "wss://maincloud.spacetimedb.com":
-        domainRef.current.value = "Cloud";
+      case "ws://localhost:8080":
+        domainRef.current.value = "Docker";
         break;
       case "ws://127.0.0.1:3000":
         domainRef.current.value = "Local";
@@ -362,7 +362,7 @@ const ConnectionContainerInner = ({ setInstanceSettings, setNickname, oidc }: IP
 
               <div className="w-30 relative">
                 <StyledSelect ref={domainRef} onChange={(value) => handleDomainChange(value)}>
-                  <option value="Cloud">cloud</option>
+                  <option value="Docker">docker</option>
                   <option value="Local">local</option>
                   <option value="Custom">custom</option>
                 </StyledSelect>

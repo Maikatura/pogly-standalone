@@ -1,8 +1,28 @@
 import type { UserManagerSettings } from "oidc-client-ts";
 import { WebStorageStateStore } from "oidc-client-ts";
 
-const issuer = (process.env.OIDC_ISSUER ?? "").trim();
-const clientId = (process.env.OIDC_CLIENT_ID ?? "").trim();
+// OIDC config can come from two places, in priority order:
+//   1. `window.POGLY_RUNTIME_CONFIG` — populated by /config.js at page load.
+//      The docker entrypoint writes that file from `docker run -e OIDC_*`
+//      env vars, so one prebuilt image can switch modes at run time.
+//   2. `process.env.OIDC_*` — baked at `npm run build` time via vite.config.ts
+//      from a `.env` file. Useful for non-docker deployments where you build
+//      and serve the bundle yourself.
+//
+// If neither yields values, OIDC is disabled (Mode 1: anonymous tokens).
+declare global {
+  interface Window {
+    POGLY_RUNTIME_CONFIG?: {
+      OIDC_ISSUER?: string;
+      OIDC_CLIENT_ID?: string;
+    };
+  }
+}
+
+const runtime = (typeof window !== "undefined" && window.POGLY_RUNTIME_CONFIG) || {};
+
+const issuer = (runtime.OIDC_ISSUER ?? process.env.OIDC_ISSUER ?? "").trim();
+const clientId = (runtime.OIDC_CLIENT_ID ?? process.env.OIDC_CLIENT_ID ?? "").trim();
 
 export const oidcEnabled = issuer.length > 0 && clientId.length > 0;
 
