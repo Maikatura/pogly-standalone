@@ -39,6 +39,9 @@ jobs:
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
+            # Always-current alias of the default branch's latest release.
+            # Lets docs reference `ghcr.io/poglyapp/pogly:latest` stably.
+            type=raw,value=latest,enable={{is_default_branch}}
       - uses: docker/build-push-action@v6
         with:
           context: .
