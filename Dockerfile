@@ -1,4 +1,6 @@
-FROM clockworklabs/spacetime:latest AS module
+# Pinned to match SpacetimeDB.Runtime version in server/StdbModule.csproj.
+# Bump both stages together when upgrading the runtime crate.
+FROM clockworklabs/spacetime:v1.7.0 AS module
 WORKDIR /app
 
 COPY --chown=spacetime:spacetime server .
@@ -10,7 +12,7 @@ WORKDIR /app
 COPY . .
 RUN npm install && npm run build
 
-FROM clockworklabs/spacetime:latest
+FROM clockworklabs/spacetime:v1.7.0
 
 USER root
 
