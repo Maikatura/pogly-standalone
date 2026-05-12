@@ -20,6 +20,7 @@ export default defineConfig(({ mode }) => {
       basePlugin(),
       importPrefixPlugin(),
       htmlPlugin(mode),
+      multiHtmlEntrypointsPlugin(),
       tailwindcss(),
       Unfonts({
         custom: {
@@ -36,7 +37,7 @@ export default defineConfig(({ mode }) => {
 });
 
 function setEnv(mode: string) {
-  Object.assign(process.env, loadEnv(mode, ".", ["REACT_APP_", "NODE_ENV", "PUBLIC_URL"]));
+  Object.assign(process.env, loadEnv(mode, ".", ["REACT_APP_", "NODE_ENV", "PUBLIC_URL", "OIDC_"]));
   process.env.NODE_ENV ||= mode;
   const { homepage } = JSON.parse(readFileSync("package.json", "utf-8"));
   process.env.PUBLIC_URL ||= homepage
@@ -47,11 +48,17 @@ function setEnv(mode: string) {
 // Expose `process.env` environment variables to your client code
 // Migration guide: Follow the guide below to replace process.env with import.meta.env in your app, you may also need to rename your environment variable to a name that begins with VITE_ instead of REACT_APP_
 // https://vitejs.dev/guide/env-and-mode.html#env-variables
+//
+// OIDC vars (OIDC_ISSUER / OIDC_CLIENT_ID) get baked normally if present at
+// build time, but they can ALSO be overridden at container runtime via
+// `window.POGLY_RUNTIME_CONFIG` (populated by docker/entrypoint.sh, served at
+// /config.js). See src/Auth/oidc.ts for the lookup order. This avoids
+// editing the bundle in place, which mangled internal sentinel constants.
 function envPlugin(): Plugin {
   return {
     name: "env-plugin",
     config(_, { mode }) {
-      const env = loadEnv(mode, ".", ["REACT_APP_", "NODE_ENV", "PUBLIC_URL"]);
+      const env = loadEnv(mode, ".", ["REACT_APP_", "NODE_ENV", "PUBLIC_URL", "OIDC_"]);
       return {
         define: Object.fromEntries(
           Object.entries(env).map(([key, value]) => [`process.env.${key}`, JSON.stringify(value)])
@@ -165,7 +172,7 @@ function importPrefixPlugin(): Plugin {
 // Migration guide: Follow the guide below, you may need to rename your environment variable to a name that begins with VITE_ instead of REACT_APP_
 // https://vitejs.dev/guide/env-and-mode.html#html-env-replacement
 function htmlPlugin(mode: string): Plugin {
-  const env = loadEnv(mode, ".", ["REACT_APP_", "NODE_ENV", "PUBLIC_URL"]);
+  const env = loadEnv(mode, ".", ["REACT_APP_", "NODE_ENV", "PUBLIC_URL", "OIDC_"]);
   return {
     name: "html-plugin",
     transformIndexHtml: {
@@ -173,6 +180,25 @@ function htmlPlugin(mode: string): Plugin {
       handler(html) {
         return html.replace(/%(.*?)%/g, (match, p1) => env[p1] ?? match);
       },
+    },
+  };
+}
+
+// Build both index.html and silent-oidc-renew.html as HTML entrypoints
+function multiHtmlEntrypointsPlugin(): Plugin {
+  return {
+    name: "multi-html-entrypoints-plugin",
+    config() {
+      return {
+        build: {
+          rollupOptions: {
+            input: {
+              main: resolve("index.html"),
+              silent: resolve("silent-oidc-renew.html"),
+            },
+          },
+        },
+      };
     },
   };
 }

@@ -1,12 +1,32 @@
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "react-oidc-context";
-import { Navigate, useLocation } from "react-router-dom";
+import { oidcEnabled } from "../../Auth/oidc";
+import { Loading } from "../../Components/General/Loading";
+
+const OidcCallbackInner = () => {
+  const auth = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (auth.isLoading) return;
+    if (auth.error) return;
+    if (auth.isAuthenticated) navigate("/login", { replace: true });
+  }, [auth.isLoading, auth.error, auth.isAuthenticated, navigate]);
+
+  if (auth.isLoading) return <Loading text="Signing in..." loadingStuckText={true} />;
+  if (auth.error) return <div>OIDC error: {auth.error.message}</div>;
+
+  return <Loading text="Finishing sign-in..." loadingStuckText={true} />;
+};
 
 export const Callback = () => {
-  const auth = useAuth();
+  const navigate = useNavigate();
 
-  if (auth.isLoading) return <p>Finishing login…</p>;
-  if (auth.error)     return <p>Login failed: {String(auth.error)}</p>;
-  if (auth.isAuthenticated) return <Navigate to="/login" replace />;
+  useEffect(() => {
+    if (!oidcEnabled) navigate("/login", { replace: true });
+  }, [navigate]);
 
-  return <p>Processing…</p>;
+  if (!oidcEnabled) return null;
+  return <OidcCallbackInner />;
 };

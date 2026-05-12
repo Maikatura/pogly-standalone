@@ -7,10 +7,9 @@ import { UploadBackupFromFile, UploadElementDataFromString } from "../../../Util
 import { useGetDefaultElements } from "../../../Hooks/useGetDefaultElements";
 import { QuickSwapType } from "../../../Types/General/QuickSwapType";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "react-oidc-context";
+import { oidcEnabled } from "../../../Auth/oidc";
 
 interface IProps {
-  legacyLogin: boolean;
   connectionConfig: ConnectionConfigType;
   spacetime: any;
 }
@@ -23,11 +22,9 @@ const steps = [
   { label: "Finish", description: "" },
 ];
 
-export const ModuleOnboarding = ({ legacyLogin, connectionConfig, spacetime }: IProps) => {
-  // Just to display debug box of doom
+export const ModuleOnboarding = ({ connectionConfig, spacetime }: IProps) => {
   const debug: boolean = false;
 
-  const auth = useAuth();
   const navigate = useNavigate();
 
   const [step, setStep] = useState<number>(0);
@@ -48,6 +45,7 @@ export const ModuleOnboarding = ({ legacyLogin, connectionConfig, spacetime }: I
 
   const [backupFile, setBackupFile] = useState<any>(null);
   const [fileError, setFileError] = useState<boolean>(false);
+  const [copyAuthButtonText, setCopyAuthButtonText] = useState<string>("Copy Owner Token");
   const [backupRowCount, setBackupRowCount] = useState<any>(null);
   const [showUploadingText, setShowUploadingText] = useState<boolean>(false);
 
@@ -409,21 +407,20 @@ export const ModuleOnboarding = ({ legacyLogin, connectionConfig, spacetime }: I
                 configuration from the settings.
               </p>
 
-              {/* NEED TO FIGURE OUT HOW TO HANDLE LEGACY/ANONYMOUS SPACETIMEAUTH LOGINS */}
-              {/* {legacyLogin && (
+              {!oidcEnabled && (
                 <div className="mt-8">
                   <p>
-                    Since you're using legacy login, it is <b>your responsibility</b> to keep your authentication token
-                    safe. Use this button to copy your token to clipboard and save it somewhere on your computer!
+                    It is <b><u>your responsibility</u></b> to keep your owner authentication token
+                    safe. Copy your backup token by clicking the button below and save it somewhere safe!
                   </p>
                   <StyledButton
                     onClick={() => {
-                      navigator.clipboard.writeText(localStorage.getItem("stdbToken")!);
+                      navigator.clipboard.writeText(localStorage.getItem("stdb-token") ?? "");
 
-                      setAuthButtonText("Copied!");
+                      setCopyAuthButtonText("Copied!");
 
                       setTimeout(() => {
-                        setAuthButtonText("Copy Auth Token");
+                        setCopyAuthButtonText("Copy Owner Token");
                       }, 1000);
                     }}
                     className="ml-0! mt-2"
@@ -431,12 +428,12 @@ export const ModuleOnboarding = ({ legacyLogin, connectionConfig, spacetime }: I
                     {copyAuthButtonText}
                   </StyledButton>
                 </div>
-              )} */}
+              )}
 
               <div className="mt-8">
                 <p>
                   To start using Pogly on your stream, you need to create a new browser source in your OBS/StreamLabs
-                  and paste the Pogly overlay URL into it{" "}
+                  and paste the Pogly overlay URL into it.
                   <a
                     href="https://github.com/PoglyApp/pogly-documentation/blob/main/use/firstTimeSetup.md#obs--streamlabs-browser-source"
                     target="_blank"
@@ -463,7 +460,7 @@ export const ModuleOnboarding = ({ legacyLogin, connectionConfig, spacetime }: I
                 </StyledButton>
               </div>
 
-              <div className="grid mt-6">
+              {/* <div className="grid mt-6">
                 <h3 className="flex text-xl font-semibold mb-2 text-[#e9eeff]">Load backup</h3>
                 <span>
                   If you have a backup file, you can select it here. It will then be loaded once you finish onboarding.
@@ -480,7 +477,7 @@ export const ModuleOnboarding = ({ legacyLogin, connectionConfig, spacetime }: I
                   {fileError && <X color="red" className="grid self-center" />}
                   {!fileError && backupFile && <Check color="green" className="grid self-center" />}
                 </div>
-              </div>
+              </div> */}
             </div>
 
             <div className="absolute bottom-0 w-full flex justify-between">
