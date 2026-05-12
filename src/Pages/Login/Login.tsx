@@ -28,7 +28,7 @@ const LoginWithOidc = () => {
 };
 
 const LoginInner = ({ oidcIdToken, oidcAuth }: { oidcIdToken?: string; oidcAuth: any }) => {
-  const isOverlay: Boolean = window.location.href.includes("/overlay");
+  const isOverlay: Boolean = window.location.pathname.startsWith("/overlay");
   const navigate = useNavigate();
 
   const { connectionConfig, setConnectionConfig } = useContext(ConfigContext);

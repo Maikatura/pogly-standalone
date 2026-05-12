@@ -129,7 +129,6 @@ const useStDB = (
       .onDisconnect(onDisconnect);
 
     clientConn = builder.build();
-    clientConn.db.heartbeat.id.find(0);
   }, [connectionConfig, initialized, oidcIdToken, setInstanceConfigured, setStdbConnected, setStdbAuthenticated, setSpacetimeDB]);
 
   return {

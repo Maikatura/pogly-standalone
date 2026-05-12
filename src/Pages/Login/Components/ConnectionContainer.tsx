@@ -24,7 +24,7 @@ const ConnectionContainerWithOidc = (props: IProp) => {
 };
 
 const ConnectionContainerInner = ({ setInstanceSettings, setNickname, oidc }: IProp & { oidc: any }) => {
-  const isOverlay: Boolean = window.location.href.includes("/overlay");
+  const isOverlay: Boolean = window.location.pathname.startsWith("/overlay");
   const [quickSwapModules, setQuickSwapModules] = useState<QuickSwapType[]>([]);
   const [quickSwapSelected, setQuickSwapSelected] = useState<QuickSwapType | null>(null);
   const [loginMethodThemeColor, setLoginMethodThemeColor] = useState<string>("#7e97a5");
