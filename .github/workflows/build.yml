@@ -32,20 +32,28 @@ jobs:
       - name: Install SpacetimeDB CLI
         shell: bash
         env:
-          # Pinned to match SpacetimeDB.Runtime version in server/StdbModule.csproj
-          # and clockworklabs/spacetime image tag in the Dockerfile.
           SPACETIME_VERSION: v1.7.0
         run: |
+          # 1. Create the target directory
           mkdir -p "$HOME/.local/bin"
+
+          # 2. Download and extract to a temporary folder to avoid clutter
+          mkdir -p "$HOME/temp_spacetime"
           curl -sSfL "https://github.com/clockworklabs/SpacetimeDB/releases/download/${SPACETIME_VERSION}/spacetime-x86_64-unknown-linux-gnu.tar.gz" \
-            | tar -xz -C "$HOME/.local/bin" --strip-components=1
-          
+            | tar -xz -C "$HOME/temp_spacetime"
+
+          # 3. Find the executable file regardless of where it landed and move it to .local/bin
+          # We look for the file that is executable and rename it to 'spacetime'
+          find "$HOME/temp_spacetime" -type f -executable -exec mv {} "$HOME/.local/bin/spacetime" \;
+
+          # 4. Verify installation
           if [ -f "$HOME/.local/bin/spacetime" ]; then
-            chmod +x "$HOME/.local/bin/spacetime"
+            echo "Spacetime CLI installed successfully:"
+            "$HOME/.local/bin/spacetime" --version
             echo "$HOME/.local/bin" >> $GITHUB_PATH
           else
-            echo "Fel: Filen hittades inte!"
-            ls -R "$HOME/.local/bin" # Hjälper oss se vad som hände
+            echo "Error: Failed to locate the spacetime CLI binary after extraction!"
+            ls -R "$HOME/temp_spacetime"
             exit 1
           fi
 
