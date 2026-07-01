@@ -28,9 +28,13 @@ export const oidcEnabled = issuer.length > 0 && clientId.length > 0;
 
 const baseUrl = (() => {
   const raw = import.meta.env.BASE_URL ?? "/";
-  const trimmed = (raw ?? "/").trim();
-  if (trimmed === "/") return "";
-  return trimmed.endsWith("/") ? trimmed.slice(0, -1) : trimmed;
+  // Trimma bort alla mellanslag, och ta bort alla inledande/avslutande punkter eller slashes
+  let trimmed = raw.trim().replace(/^\.*|\.*$/g, '').replace(/\/+$/, '');
+
+  if (trimmed === "" || trimmed === "/") return "";
+
+  // Se till att den börjar med en slash om det behövs, men vi returnerar den ren
+  return trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
 })();
 
 const origin = window.location.origin.replace(/\.$/, "");
@@ -39,7 +43,7 @@ export const oidcConfig: UserManagerSettings = {
   authority: issuer,
   client_id: clientId,
 
-  redirect_uri: `${origin}/callback`,
+  redirect_uri: `${origin}${baseUrl}/callback`,
   post_logout_redirect_uri: `${origin}${baseUrl}/`,
   silent_redirect_uri: `${origin}${baseUrl}/silent-oidc-renew.html`,
 
