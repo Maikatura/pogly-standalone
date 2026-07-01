@@ -38,9 +38,16 @@ jobs:
         run: |
           mkdir -p "$HOME/.local/bin"
           curl -sSfL "https://github.com/clockworklabs/SpacetimeDB/releases/download/${SPACETIME_VERSION}/spacetime-x86_64-unknown-linux-gnu.tar.gz" \
-            | tar -xz -C "$HOME/.local/bin"
-          chmod +x "$HOME/.local/bin/spacetime"
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
+            | tar -xz -C "$HOME/.local/bin" --strip-components=1
+          
+          if [ -f "$HOME/.local/bin/spacetime" ]; then
+            chmod +x "$HOME/.local/bin/spacetime"
+            echo "$HOME/.local/bin" >> $GITHUB_PATH
+          else
+            echo "Fel: Filen hittades inte!"
+            ls -R "$HOME/.local/bin" # Hjälper oss se vad som hände
+            exit 1
+          fi
 
       - name: Build module
         run: |
