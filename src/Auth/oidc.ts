@@ -33,7 +33,7 @@ const baseUrl = (() => {
   return trimmed.endsWith("/") ? trimmed.slice(0, -1) : trimmed;
 })();
 
-const origin = window.location.origin;
+const origin = window.location.origin.replace(/\.$/, "");;
 
 export const oidcConfig: UserManagerSettings = {
   authority: issuer,
